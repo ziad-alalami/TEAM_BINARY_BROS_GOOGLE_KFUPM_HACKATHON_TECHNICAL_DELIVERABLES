@@ -20,7 +20,7 @@ The system architecture separates the interactive client layer from the heavy co
 **Key Components:**
 * **Frontend:** React Web App hosted on Firebase, featuring Google Maps Photorealistic 3D Tiles.
 * **Backend:** Serverless FastAPI on Cloud Run for auto-scaling.
-* **AI/ML:** Vertex AI Agent Builder (Gemini 1.5 Pro) for the chatbot and Vertex AI Prediction for the GNN model.
+* **AI/ML:** Vertex AI Agent Builder (Gemini) for the chatbot and Vertex AI Prediction for the GNN model.
 * **Data:** Neo4j (Graph DB) on GKE for storing district nodes and mobility edges; BigQuery for historical analytics.
 
 ![system_arhitecutre.svg](https://github.com/ziad-alalami/TEAM_BINARY_BROS_GOOGLE_KFUPM_HACKATHON_TECHNICAL_DELIVERABLES/blob/main/system_architecture.svg)
