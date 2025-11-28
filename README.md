@@ -1,5 +1,5 @@
 # Binary Bros: Epidemic Simulation & Prediction Platform
-**Google KFUPM Hackathon | Week 1 Deliverable**
+**Google KFUPM Hackathon | Technical Requirements Deliverable**
 
 ## 1. Project Overview
 We have designed a scalable, cloud-native architecture for simulating non-zoonotic respiratory virus outbreaks (e.g., ILI, RSV) in major Saudi Arabian cities (Riyadh, Jeddah, Eastern Province). Our solution utilizes a **Hybrid Temporal Graph Neural Network (GNN)**, combining epidemiological domain knowledge (SEIR models) with deep learning for high-accuracy 30-day forecasts.
@@ -23,7 +23,7 @@ The system architecture separates the interactive client layer from the heavy co
 * **AI/ML:** Vertex AI Agent Builder (Gemini 1.5 Pro) for the chatbot and Vertex AI Prediction for the GNN model.
 * **Data:** Neo4j (Graph DB) on GKE for storing district nodes and mobility edges; BigQuery for historical analytics.
 
-[IMAGE_DESCRIPTION_PLACEHOLDER: A flowchart showing the Google Cloud architecture. It depicts the React Client connecting to a Cloud Load Balancer, which forwards requests to a FastAPI backend on Cloud Run. The backend connects to Vertex AI services (Agent, Prediction, Training) and Data Persistence services (Neo4j, BigQuery, Cloud Storage).]
+![system_arhitecutre.svg](https://github.com/ziad-alalami/TEAM_BINARY_BROS_GOOGLE_KFUPM_HACKATHON_TECHNICAL_DELIVERABLES/blob/main/system_architecture.svg)
 
 ---
 
@@ -37,11 +37,24 @@ The interface is designed for "Dark Mode" scientific visualization to reduce eye
 * **Right Sidebar (Controls):** Contains sliders for hyperparameters (R0, Incubation period) and toggles for policy interventions (School Closures, Mask Mandates).
 * **Bottom Panel (Timeline):** A playback control to view the spread evolution over the 30-day horizon.
 
-[IMAGE_DESCRIPTION_PLACEHOLDER: A wireframe diagram or screenshot of the UI. It shows a layout with a top header, a left sidebar for statistics, a central 3D map container, a right sidebar for simulation controls, a bottom timeline slider, and a chat widget in the bottom right corner.]
+![Basic UI image](https://github.com/ziad-alalami/TEAM_BINARY_BROS_GOOGLE_KFUPM_HACKATHON_TECHNICAL_DELIVERABLES/blob/main/basic_ui.png)
 
 ---
 
-## 4. Simulation Workflows
+## 4. MLOps & Model Lifecycle
+To ensure the reliability and accuracy of our epidemic forecasts over time, we have implemented a robust MLOps pipeline using **Vertex AI Pipelines**. This automates the journey from raw data to a deployed model, ensuring our predictions adapt to changing real-world conditions (e.g., new virus mutations or mobility shifts).
+
+### Pipeline Components
+* **Data Ingestion & Preprocessing:** We use **Dataflow** to ingest raw mobility and demographic data, clean it, and structure it into graph snapshots stored in **Neo4j**.
+* **Training & Evaluation:** A **Vertex AI Training** job extracts the latest graph states from Neo4j. It trains the Temporal GNN on GPU clusters and evaluates it against historical outbreak data.
+* **Model Registry:** Successful models (meeting the $R^2 > 0.80$ target) are versioned and pushed to the **Vertex AI Model Registry**.
+* **Continuous Monitoring:** Once deployed, **Vertex AI Model Monitoring** tracks the live model for **data drift** (e.g., if population mobility drastically changes due to a holiday). If drift is detected, an alert triggers a retraining pipeline.
+
+![MLOps Flow](https://github.com/ziad-alalami/TEAM_BINARY_BROS_GOOGLE_KFUPM_HACKATHON_TECHNICAL_DELIVERABLES/blob/main/mlops_pipeline.svg)
+
+---
+
+## 5. Simulation Workflows
 
 ### A. Core Simulation Loop
 When a user triggers a simulation, the system iterates through a 30-day cycle. The **Backend API** acts as the controller, fetching the initial graph state from **Neo4j**, passing it to the **Vertex AI** model for inference, and storing the daily predictions back into the database.
@@ -51,8 +64,7 @@ When a user triggers a simulation, the system iterates through a 30-day cycle. T
 2.  Backend fetches the current graph topology (Day 0) from Neo4j.
 3.  Vertex AI predicts the next day's state (S, E, I, R counts) using the Temporal GNN.
 4.  Results are stored and sent back to the UI for rendering.
-
-[IMAGE_DESCRIPTION_PLACEHOLDER: A sequence diagram illustrating the simulation flow. The User clicks 'Run', the UI calls the Backend API, the API fetches the graph state from Neo4j, sends it to the Vertex AI Model for prediction loop (30 days), and returns the forecast series to the UI.]
+![Simulation Sequence Flow](https://github.com/ziad-alalami/TEAM_BINARY_BROS_GOOGLE_KFUPM_HACKATHON_TECHNICAL_DELIVERABLES/blob/main/simulate_usecase.svg)
 
 ### B. AI Agent Interaction
 We integrated **Vertex AI Agent Builder** to allow natural language interaction. The user can ask complex questions or trigger actions. Crucially, the **Backend API** mediates all requests, ensuring security and proper tool execution.
@@ -61,4 +73,4 @@ We integrated **Vertex AI Agent Builder** to allow natural language interaction.
 * **Q&A:** "Why is the infection rate high in Riyadh?" (The agent queries Neo4j via the backend to explain mobility patterns).
 * **Action:** "Simulate a scenario where we close schools." (The agent identifies the intent and triggers the simulation endpoint with specific parameters).
 
-[IMAGE_DESCRIPTION_PLACEHOLDER: A sequence diagram for the AI Agent. It shows two scenarios: 1. A Q&A flow where the Agent queries Neo4j to answer a user question. 2. An action flow where the Agent triggers the 'simulate' tool on the Backend API to start a new job based on user instructions.]
+![Agent Sequence Flow](https://github.com/ziad-alalami/TEAM_BINARY_BROS_GOOGLE_KFUPM_HACKATHON_TECHNICAL_DELIVERABLES/blob/main/agent_usecase.png)
